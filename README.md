@@ -3,6 +3,12 @@
 
 [![](https://jitpack.io/v/chenyy0708/RippleButton.svg)](https://jitpack.io/#chenyy0708/RippleButton)
 
+
+## 效果图
+
+![示例图1](https://github.com/chenyy0708/RippleButton/blob/master/img/%E5%A4%9A%E7%8A%B6%E6%80%81%E6%8C%89%E9%92%AE.gif)
+
+
 ## 导入地址
 
 
