@@ -6,6 +6,8 @@
 
 ## 效果图
 
+> gif掉帧比较严重，实际效果很流畅  不过只支持5.0以上才有动画
+
 ![示例图1](https://github.com/chenyy0708/RippleButton/blob/master/img/%E5%A4%9A%E7%8A%B6%E6%80%81%E6%8C%89%E9%92%AE.gif)
 
 
