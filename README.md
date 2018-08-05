@@ -41,3 +41,15 @@ implementation 'com.github.chenyy0708:RippleButton:v1.0.0'
 | green_text     |  绿色按钮文字 |
 | loading_text     |  加载按钮文字 |
 | status     |  默认按钮状态   灰色:0  绿色:1 红色:2 加载:3  |
+
+> 红色按钮有一个重载方法，可以控制显示红色按钮之后，是否自动变回绿色按钮。
+
+```
+     /**
+     * 显示红色按钮
+     *
+     * @param isReset 是否重置回到上一个颜色吗，默认重置
+     */
+     public void showRedButton(boolean isReset) {
+     }
+```
