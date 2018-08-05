@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RippleButton">
+        <attr name="gray_text" format="string" />
+        <attr name="red_text" format="string" />
+        <attr name="green_text" format="string" />
+        <attr name="loading_text" format="string" />
+        <attr name="status" format="integer" />
+    </declare-styleable>
+
+</resources>
