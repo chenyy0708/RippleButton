@@ -35,7 +35,7 @@ implementation 'com.github.chenyy0708:RippleButton:v1.0.0'
 ## 属性
 
 | 属性名                |  说明 |
-| :----------------:  :-----:|   
+| :----------------: |:-------------:|
 | gray_text     |  灰色按钮文字 |
 | red_text     |  红色按钮文字 |
 | green_text     |  绿色按钮文字 |
