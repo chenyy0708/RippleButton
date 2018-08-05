@@ -31,3 +31,13 @@ allprojects {
 implementation 'com.github.chenyy0708:RippleButton:v1.0.0'
 ```
 
+
+## 属性
+
+| 属性名                |  说明 |
+| :----------------:  :-----:|   
+| gray_text     |  灰色按钮文字 |
+| red_text     |  红色按钮文字 |
+| green_text     |  绿色按钮文字 |
+| loading_text     |  加载按钮文字 |
+| status     |  默认按钮状态   灰色:0  绿色:1 红色:2 加载:3  |
