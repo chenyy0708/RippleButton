@@ -28,28 +28,43 @@ allprojects {
 > app build.gradle配置
 
 ```
-implementation 'com.github.chenyy0708:RippleButton:v1.0.0'
+implementation 'com.github.chenyy0708:RippleButton:1.0.1'
 ```
-
 
 ## 属性
 
 | 属性名                |  说明 |
 | :----------------: |:-------------:|
-| gray_text     |  灰色按钮文字 |
-| red_text     |  红色按钮文字 |
-| green_text     |  绿色按钮文字 |
-| loading_text     |  加载按钮文字 |
-| status     |  默认按钮状态   灰色:0  绿色:1 红色:2 加载:3  |
+| mNormalText     |  默认状态文字 |
+| mErrorText     |  失败状态文字 |
+| mSuccessText     |  成功状态文字 |
+| mLoadingText     |  加载状态文字 |
+| mStatus     |  默认按钮状态   默认:0  成功:1 失败:2 加载:3  |
 
-> 红色按钮有一个重载方法，可以控制显示红色按钮之后，是否自动变回绿色按钮。
+## 初始化全局属性
+
+> 建议在Application初始化，暂时提供以下属性可设置。
 
 ```
-     /**
-     * 显示红色按钮
-     *
-     * @param isReset 是否重置回到上一个颜色吗，默认重置
-     */
-     public void showRedButton(boolean isReset) {
-     }
+RippleButton.getBuilder()
+                // 加载中图片
+                .setLoadingImg(R.drawable.loading)
+                // 错误按钮显示时间
+                .setErrorDuritaion(1000)
+                // 默认文字颜色
+                .setNormalTextColor(R.color.white)
+                // 成功文字颜色
+                .setSuccessTextColor(R.color.white)
+                // 加载文字颜色
+                .setLoadingTextColor(R.color.white)
+                // 错误文字颜色
+                .setErrorTextColor(R.color.white)
+                // 默认背景颜色
+                .setNormalColor(R.drawable.shape_blue)
+                // 成功背景颜色
+                .setSuccessColor(R.drawable.shape_green)
+                // 加载背景颜色
+                .setLoadingColor(R.drawable.shape_yellow)
+                // 失敗背景颜色
+                .setErrorColor(R.drawable.shape_red);
 ```
