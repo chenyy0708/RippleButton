@@ -521,9 +521,10 @@ public class RippleButton extends FrameLayout implements View.OnClickListener {
             return this;
         }
 
-        public void setPerfectMills(long perfectMills) {
+        public Builder setPerfectMills(long perfectMills) {
             this.perfectMills = perfectMills;
             CircularAnim.init(perfectMills, 0, Color.WHITE); // 动画时间
+            return this;
         }
     }
 }
