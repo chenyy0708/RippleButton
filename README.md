@@ -10,7 +10,7 @@
 
 ![示例图1](https://github.com/chenyy0708/RippleButton/blob/master/img/%E5%A4%9A%E7%8A%B6%E6%80%81%E6%8C%89%E9%92%AE%E5%88%87%E6%8D%A2.gif)
 
-![示例图2](https://github.com/chenyy0708/RippleButton/blob/5fb2ee8abd6c20447dc818330063e6d0e8b0c821/img/%E5%A4%9A%E7%8A%B6%E6%80%81%E6%8C%89%E9%92%AE%E7%82%B9%E5%87%BB.gif)
+![示例图2](https://github.com/chenyy0708/RippleButton/blob/01a715d9d27863b87c5f25a7ec94d77eae603d41/img/%E5%A4%9A%E7%8A%B6%E6%80%81%E6%8C%89%E9%92%AE%E7%82%B9%E5%87%BB.gif)
 
 
 ## 导入地址
