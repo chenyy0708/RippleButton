@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="RippleButton">
-        <attr name="gray_text" format="string" />
-        <attr name="red_text" format="string" />
-        <attr name="green_text" format="string" />
-        <attr name="loading_text" format="string" />
-        <attr name="status" format="integer" />
+        <attr name="mNormalText" format="string" />
+        <attr name="mErrorText" format="string" />
+        <attr name="mSuccessText" format="string" />
+        <attr name="mStatus" format="integer" />
+        <attr name="mRadius" format="dimension" />
+        <attr name="mLoadingText" format="string" />
+        <attr name="mLoadImg" format="reference" />
     </declare-styleable>
 
 </resources>

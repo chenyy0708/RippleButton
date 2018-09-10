@@ -49,10 +49,11 @@
         android:layout_gravity="center"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        app:gray_text="灰色"
-        app:green_text="绿色"
-        app:loading_text="加载中"
-        app:red_text="红色"
-        app:status="1" />
+        app:mErrorText="红色"
+        app:mLoadingText="加载中"
+        app:mNormalText="灰色"
+        app:mRadius="4dp"
+        app:mStatus="1"
+        app:mSuccessText="绿色" />
 
 </FrameLayout>

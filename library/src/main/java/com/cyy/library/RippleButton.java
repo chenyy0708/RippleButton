@@ -1,13 +1,14 @@
 package com.cyy.library;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -15,29 +16,29 @@ import android.widget.TextView;
 
 
 public class RippleButton extends RelativeLayout implements View.OnClickListener {
-    public static final int GRAY = 0;
-    public static final int GREEN = 1;
-    public static final int RED = 2;
+    public static final int NORMAL = 0;
+    public static final int SUCCESS = 1;
+    public static final int ERROR = 2;
     public static final int LOADING = 3;
 
-    private Context context;
-    private String grayText;
-    private String redText;
-    private String greenText;
+    private Context mContext;
+    private String mNormalText;
+    private String mErrorText;
+    private String mSuccessText;
     /**
      * 默认加载中
      */
-    private String loadingText;
-    private TextView tvGray;
-    private TextView tvRed;
-    private TextView tvGreen;
+    private String mLoadingText;
+    private TextView mTvNormal;
+    private TextView mTvError;
+    private TextView mTvSuccess;
     /**
      * 按钮当前颜色，默认灰色
      */
     private int currentButton = 0;
-    private FrameLayout flLoading;
-    private TextView tvLoading;
-    private ImageView ivLoading;
+    private FrameLayout mFlLoading;
+    private TextView mTvLoading;
+    private ImageView mIvLoading;
     /**
      * 按钮自动消失的时间
      */
@@ -50,11 +51,28 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
      * 安全的Handler
      */
     private WeakHandler weakHandler;
-
+    /**
+     * 按钮圆角
+     */
+    private float mRadius;
     /**
      * 按钮初始状态
      */
-    private int status = GRAY;
+    private int mStatus = NORMAL;
+    /**
+     * 加载中 图片
+     */
+    @DrawableRes
+    private int mLoadingImg;
+    /**
+     * 显示红色之前的按钮状态，用于红色按钮显示完毕恢复按钮状态
+     */
+    private int mLastButtonStatus = 0;
+    /**
+     * 涟漪动画时间
+     */
+    private long perfectMills = 300;
+    private static Builder builder = new Builder();
 
     public RippleButton(Context context) {
         this(context, null);
@@ -62,7 +80,7 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
 
     public RippleButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.context = context;
+        this.mContext = context;
         weakHandler = new WeakHandler();
         View.inflate(context, R.layout.ripple_button, this);
         setUp(attrs);
@@ -70,49 +88,56 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
 
     /**
      * 设置属性
-     * 按钮层级：灰色 ---> 红色 --- > 绿色 -- > 加载
+     * 按钮层级：默认 ---> 失败 --- > 成功 -- > 加载
      *
      * @param attrs
      */
     private void setUp(AttributeSet attrs) {
-        TypedArray a = context.getTheme().obtainStyledAttributes(
+        Log.d("RippleButton", "setUp: " + builder.hashCode());
+        // 初始化全局Builder中的属性
+        setBuilder();
+        TypedArray a = mContext.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.RippleButton, 0, 0);
         try {
-            grayText = a.getString(R.styleable.RippleButton_gray_text);
-            redText = a.getString(R.styleable.RippleButton_red_text);
-            greenText = a.getString(R.styleable.RippleButton_green_text);
-            loadingText = a.getString(R.styleable.RippleButton_loading_text);
-            status = a.getInteger(R.styleable.RippleButton_status, GRAY);
+            mNormalText = a.getString(R.styleable.RippleButton_mNormalText);
+            mErrorText = a.getString(R.styleable.RippleButton_mErrorText);
+            mSuccessText = a.getString(R.styleable.RippleButton_mSuccessText);
+            mLoadingText = a.getString(R.styleable.RippleButton_mLoadingText);
+            mStatus = a.getInteger(R.styleable.RippleButton_mStatus, NORMAL);
+            mRadius = a.getDimension(R.styleable.RippleButton_mRadius,
+                    Utils.dip2px(mContext, 4));
+            mLoadingImg = a.getResourceId(R.styleable.RippleButton_mLoadImg, builder.mLoadingImg);
         } finally {
             a.recycle();
         }
-        tvGray = findViewById(R.id.tv_gray);
-        tvRed = findViewById(R.id.tv_red);
-        tvGreen = findViewById(R.id.tv_green);
-        flLoading = findViewById(R.id.fl_loading);
-        tvLoading = findViewById(R.id.tv_loading);
-        ivLoading = findViewById(R.id.iv_loading);
-        tvGray.setText(grayText);
-        tvRed.setText(redText);
-        // 默认显示灰色按钮的字
-        tvGreen.setText(TextUtils.isEmpty(greenText) ? grayText : greenText);
-        tvLoading.setText(TextUtils.isEmpty(loadingText) ? context.getString(R.string.loading) : loadingText);
-        tvGray.setTextColor(getResources().getColor(R.color.color_999));
-        tvRed.setTextColor(getResources().getColor(R.color.white));
-        tvGreen.setTextColor(getResources().getColor(R.color.white));
-        tvGray.setOnClickListener(this);
-        tvGreen.setOnClickListener(this);
-        tvRed.setOnClickListener(this);
-        flLoading.setOnClickListener(this);
-        switch (status) {
-            case GRAY:
-                showGrayButton();
+        mTvNormal = findViewById(R.id.tv_gray);
+        mTvError = findViewById(R.id.tv_red);
+        mTvSuccess = findViewById(R.id.tv_green);
+        mFlLoading = findViewById(R.id.fl_loading);
+        mTvLoading = findViewById(R.id.tv_loading);
+        mIvLoading = findViewById(R.id.iv_loading);
+        mTvNormal.setText(mNormalText);
+        mTvError.setText(mErrorText);
+        // 成功按钮 默认显示 默认 按钮的字
+        mTvSuccess.setText(TextUtils.isEmpty(mSuccessText) ? mNormalText : mSuccessText);
+        mTvLoading.setText(TextUtils.isEmpty(mLoadingText) ? mContext.getString(R.string.loading) : mLoadingText);
+        mTvNormal.setTextColor(getResources().getColor(R.color.color_999));
+        mTvError.setTextColor(getResources().getColor(R.color.white));
+        mTvSuccess.setTextColor(getResources().getColor(R.color.white));
+        mIvLoading.setImageResource(mLoadingImg);
+        mTvNormal.setOnClickListener(this);
+        mTvSuccess.setOnClickListener(this);
+        mTvError.setOnClickListener(this);
+        mFlLoading.setOnClickListener(this);
+        switch (mStatus) {
+            case NORMAL:
+                showNormalButton();
                 break;
-            case GREEN:
-                showGreenButton();
+            case SUCCESS:
+                showSuccessButton();
                 break;
-            case RED:
-                showRedButton(false);
+            case ERROR:
+                showErrorButton(false);
                 break;
             case LOADING:
                 showLoadingButton();
@@ -121,89 +146,111 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
     }
 
     /**
-     * 显示灰色按钮
+     * 初始化全局属性
      */
-    public void showGrayButton() {
-        if (currentButton == RED) { // 当前颜色为红色，只需要隐藏红色按钮即可
-            CircularAnim.hide(tvRed).go();
-        } else if (currentButton == GREEN) { // 绿色，需要先隐藏红色按钮，然后执行涟漪动画隐藏绿色按钮
-            tvRed.setVisibility(INVISIBLE);
-            CircularAnim.hide(tvGreen).go();
+    private void setBuilder() {
+        this.mLoadingImg = builder.mLoadingImg;
+        this.mRadius = builder.mRadius;
+        this.duration = builder.mErrorDuritaion;
+    }
+
+    /**
+     * 显示默认按钮
+     */
+    public void showNormalButton() {
+        if (currentButton == ERROR) { // 当前颜色为红色，只需要隐藏红色按钮即可
+            CircularAnim.hide(mTvError).go();
+        } else if (currentButton == SUCCESS) { // 绿色，需要先隐藏红色按钮，然后执行涟漪动画隐藏绿色按钮
+            mTvError.setVisibility(INVISIBLE);
+            CircularAnim.hide(mTvSuccess).go();
         } else if (currentButton == LOADING) { // 加载按钮， 隐藏绿色、红色按钮，涟漪动画隐藏加载按钮
-            tvGreen.setVisibility(INVISIBLE);
-            tvRed.setVisibility(INVISIBLE);
+            mTvSuccess.setVisibility(INVISIBLE);
+            mTvError.setVisibility(INVISIBLE);
             hideLoadingButton();
         }
-        currentButton = GRAY; // 更新按钮颜色
+        currentButton = NORMAL; // 更新按钮颜色
         weakHandler.removeCallbacksAndMessages(null);
     }
 
     /**
-     * 显示红色按钮
+     * 显示错误按钮
      *
      * @param isReset 是否重置回到上一个颜色吗，默认重置
      */
-    public void showRedButton(boolean isReset) {
-        if (currentButton == GRAY) { // 当前颜色为灰色，只需要显示红色按钮即可
-            CircularAnim.show(tvRed).go();
-        } else if (currentButton == GREEN) { // 绿色，涟漪动画隐藏绿色按钮,显示红色按钮
-            tvRed.setVisibility(VISIBLE);
-            CircularAnim.hide(tvGreen).go();
+    public void showErrorButton(boolean isReset) {
+        if (currentButton == NORMAL) { // 当前颜色为灰色，只需要显示红色按钮即可
+            CircularAnim.show(mTvError).go();
+        } else if (currentButton == SUCCESS) { // 绿色，涟漪动画隐藏绿色按钮,显示红色按钮
+            mTvError.setVisibility(VISIBLE);
+            CircularAnim.hide(mTvSuccess).go();
         } else if (currentButton == LOADING) { // 加载布局， 隐藏绿色按钮，涟漪动画隐藏加载按钮
-            tvRed.setVisibility(VISIBLE);
-            tvGreen.setVisibility(INVISIBLE);
+            mTvError.setVisibility(VISIBLE);
+            mTvSuccess.setVisibility(INVISIBLE);
             hideLoadingButton();
         }
+        // 纪录上一次按钮状态，用于恢复按钮
+        if (currentButton != ERROR)
+            mLastButtonStatus = currentButton;
         // 两秒后回到原始按钮
-        currentButton = RED; // 更新按钮颜色
+        currentButton = ERROR; // 更新按钮颜色
         weakHandler.removeCallbacksAndMessages(null);
         if (isReset)
-            // 显示错误红色按钮时，定时回到原始按钮状态
             weakHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    showGreenButton();
+                    switch (mLastButtonStatus) { // 返回上一次按钮
+                        case SUCCESS:
+                            showSuccessButton();
+                            break;
+                        case NORMAL:
+                            showNormalButton();
+                            break;
+                        default:
+                            showSuccessButton();
+                            break;
+                    }
                 }
             }, duration);
     }
 
     /**
-     * 显示红色按钮
+     * 显示错误按钮
      */
-    public void showRedButton() {
-        showRedButton(true);
+    public void showErrorButton() {
+        showErrorButton(true);
     }
 
     /**
      * 显示红色按钮
      */
-    public void showRedButton(String redText) {
-        tvRed.setText(redText);
-        showRedButton();
+    public void showErrorButton(String redText) {
+        mTvError.setText(redText);
+        showErrorButton();
     }
 
     /**
-     * 显示绿色按钮
+     * 显示成功按钮
      */
-    public void showGreenButton() {
-        if (currentButton == GRAY) { // 当前颜色为灰色，涟漪动画显示绿色按钮即可
-            CircularAnim.show(tvGreen).go();
-        } else if (currentButton == RED) { // 红色，涟漪动画显示绿色按钮
-            CircularAnim.show(tvGreen).go();
+    public void showSuccessButton() {
+        if (currentButton == NORMAL) { // 当前颜色为灰色，涟漪动画显示绿色按钮即可
+            CircularAnim.show(mTvSuccess).go();
+        } else if (currentButton == ERROR) { // 红色，涟漪动画显示绿色按钮
+            CircularAnim.show(mTvSuccess).go();
         } else if (currentButton == LOADING) { // 加载布局，涟漪动画隐藏 加载按钮即可
-            tvGreen.setVisibility(VISIBLE);
+            mTvSuccess.setVisibility(VISIBLE);
             hideLoadingButton();
         }
-        currentButton = GREEN; // 更新按钮颜色
+        currentButton = SUCCESS; // 更新按钮颜色
+        weakHandler.removeCallbacksAndMessages(null);
     }
 
 
     /**
-     * 显示绿色按钮
+     * 显示成功按钮
      */
-    public void showGreenButton(String greenText) {
-        tvGreen.setText(greenText);
-        showGreenButton();
+    public void showSuccessButton(String greenText) {
+        mTvSuccess.setText(greenText);
+        showSuccessButton();
     }
 
     /**
@@ -211,8 +258,8 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
      */
     private void hideLoadingButton() {
         // 停止旋转动画
-        ivLoading.clearAnimation();
-        CircularAnim.hide(flLoading).go();
+        mIvLoading.clearAnimation();
+        CircularAnim.hide(mFlLoading).go();
     }
 
     /**
@@ -220,15 +267,16 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
      */
     public void showLoadingButton() {
         // 开始旋转动画
-        rotationView(ivLoading, 0f, 359f, 500, -1);
-        if (currentButton == GRAY) {
-            CircularAnim.show(flLoading).go();
-        } else if (currentButton == RED) {
-            CircularAnim.show(flLoading).go();
-        } else if (currentButton == GREEN) {
-            CircularAnim.show(flLoading).go();
+        Utils.rotationView(mIvLoading, 0f, 359f, 500, -1);
+        if (currentButton == NORMAL) {
+            CircularAnim.show(mFlLoading).go();
+        } else if (currentButton == ERROR) {
+            CircularAnim.show(mFlLoading).go();
+        } else if (currentButton == SUCCESS) {
+            CircularAnim.show(mFlLoading).go();
         }
         currentButton = LOADING; // 更新按钮颜色
+        weakHandler.removeCallbacksAndMessages(null);
     }
 
 
@@ -255,20 +303,20 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
     /**
      * 设置灰色按钮文字
      *
-     * @param grayText
+     * @param mNormalText 默认按钮文字
      */
-    public RippleButton setGrayText(String grayText) {
-        tvGray.setText(grayText);
+    public RippleButton setNormalText(String mNormalText) {
+        mTvNormal.setText(mNormalText);
         return this;
     }
 
     /**
      * 设置红色按钮文字
      *
-     * @param redText
+     * @param mErrorText 默认错误文字
      */
-    public RippleButton setRedText(String redText) {
-        tvRed.setText(redText);
+    public RippleButton setErrorText(String mErrorText) {
+        mTvError.setText(mErrorText);
         return this;
     }
 
@@ -276,39 +324,31 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
     /**
      * 设置绿色按钮文字
      *
-     * @param greenText
+     * @param mSuccessText 默认成功文字
      */
-    public RippleButton setGreenText(String greenText) {
-        tvGreen.setText(greenText);
+    public RippleButton setSuccessText(String mSuccessText) {
+        mTvSuccess.setText(mSuccessText);
         return this;
     }
 
     /**
      * 设置加载按钮文字
      *
-     * @param loadingText
+     * @param mLoadingText 默认加载文字
      */
-    public RippleButton setLoadingText(String loadingText) {
-        tvLoading.setText(loadingText);
+    public RippleButton setLoadingText(String mLoadingText) {
+        mTvLoading.setText(mLoadingText);
         return this;
     }
 
     /**
      * 红色按钮显示时间
      *
-     * @param duration
+     * @param duration 错误按钮显示时间
      */
-    public RippleButton setDuration(long duration) {
+    public RippleButton setErrorDuration(long duration) {
         this.duration = duration;
         return this;
-    }
-
-    private void rotationView(View view, float from, float to, int duration, int repeatCount) {
-        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "rotation", from, to);
-        animator.setRepeatCount(repeatCount);
-        animator.setInterpolator(new LinearInterpolator());
-        animator.setDuration(duration);
-        animator.start();
     }
 
     /**
@@ -330,12 +370,89 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
     }
 
     /**
-     * 动画过渡时间
-     * 在Application初始化
-     *
-     * @param perfectMills 时间
+     * 预设属性，建议在Application初始化
      */
-    public static void init(long perfectMills) {
-        CircularAnim.init(perfectMills, 0, Color.WHITE); // 动画时间
+    public static RippleButton.Builder getBuilder() {
+        return builder;
+    }
+
+    public static class Builder {
+        /**
+         * 错误按钮显示时间
+         */
+        private long mErrorDuritaion = 2000;
+        /**
+         * 涟漪动画时间
+         */
+        private long perfectMills = 300;
+        /**
+         * 按钮圆角
+         */
+        private float mRadius;
+        /**
+         * 加载中 图片
+         */
+        @DrawableRes
+        private int mLoadingImg = R.drawable.loading;
+        /**
+         * 默认按钮颜色
+         */
+        @ColorRes
+        private int mNormalColor;
+        /**
+         * 错误按钮颜色
+         */
+        @ColorRes
+        private int mErrorColor;
+        /**
+         * 成功按钮颜色
+         */
+        @ColorRes
+        private int mSuccessColor;
+        /**
+         * 加载按钮颜色
+         */
+        @ColorRes
+        private int mLoadingColor;
+
+        public Builder setErrorDuritaion(int mErrorDuritaion) {
+            this.mErrorDuritaion = mErrorDuritaion;
+            return this;
+        }
+
+        public Builder setRadius(float mRadius) {
+            this.mRadius = mRadius;
+            return this;
+        }
+
+        public Builder setLoadingImg(@DrawableRes int mLoadingImg) {
+            this.mLoadingImg = mLoadingImg;
+            return this;
+        }
+
+        public Builder setNormalColor(int mNormalColor) {
+            this.mNormalColor = mNormalColor;
+            return this;
+        }
+
+        public Builder setErrorColor(int mErrorColor) {
+            this.mErrorColor = mErrorColor;
+            return this;
+        }
+
+        public Builder setSuccessColor(int mSuccessColor) {
+            this.mSuccessColor = mSuccessColor;
+            return this;
+        }
+
+        public Builder setLoadingColor(int mLoadingColor) {
+            this.mLoadingColor = mLoadingColor;
+            return this;
+        }
+
+        public void setPerfectMills(long perfectMills) {
+            this.perfectMills = perfectMills;
+            CircularAnim.init(perfectMills, 0, Color.WHITE); // 动画时间
+        }
     }
 }

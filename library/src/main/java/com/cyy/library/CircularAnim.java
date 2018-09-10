@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
@@ -21,6 +23,17 @@ public class CircularAnim {
     private static Long sPerfectMills;
     private static Long sFullActivityPerfectMills;
     private static Integer sColorOrImageRes;
+
+    /**
+     * View visible OnAnimatorDeployListener.
+     */
+    private static OnAnimatorDeployListener sShowAnimatorDeployListener, sHideAnimatorDeployListener;
+
+    /**
+     * Activity OnAnimatorDeployListener.
+     */
+    private static OnAnimatorDeployListener sStartAnimatorDeployListener, sReturnAnimatorDeployListener;
+
 
     private static long getPerfectMills() {
         if (sPerfectMills != null)
@@ -48,16 +61,23 @@ public class CircularAnim {
         void onAnimationEnd();
     }
 
-    @SuppressLint("NewApi")
+    public interface OnAnimatorDeployListener {
+        void deployAnimator(Animator animator);
+    }
+
     public static class VisibleBuilder {
 
         private View mAnimView, mTriggerView;
 
         private Float mStartRadius, mEndRadius;
 
+        private Point mTriggerPoint;
+
         private long mDurationMills = getPerfectMills();
 
         private boolean isShow;
+
+        private OnAnimatorDeployListener mOnAnimatorDeployListener;
 
         private OnAnimationEndListener mOnAnimationEndListener;
 
@@ -72,8 +92,21 @@ public class CircularAnim {
             }
         }
 
+        /**
+         * set the trigger view.
+         * if {@link VisibleBuilder#mTriggerPoint} is null,
+         * then will set the mTriggerView's center as trigger point.
+         */
         public VisibleBuilder triggerView(View triggerView) {
             mTriggerView = triggerView;
+            return this;
+        }
+
+        /**
+         * set the trigger point.
+         */
+        public VisibleBuilder triggerPoint(Point triggerPoint) {
+            mTriggerPoint = triggerPoint;
             return this;
         }
 
@@ -92,9 +125,8 @@ public class CircularAnim {
             return this;
         }
 
-        @Deprecated //You can use method - go(OnAnimationEndListener onAnimationEndListener).
-        public VisibleBuilder onAnimationEndListener(OnAnimationEndListener onAnimationEndListener) {
-            mOnAnimationEndListener = onAnimationEndListener;
+        public VisibleBuilder deployAnimator(OnAnimatorDeployListener onAnimatorDeployListener) {
+            mOnAnimatorDeployListener = onAnimatorDeployListener;
             return this;
         }
 
@@ -102,6 +134,7 @@ public class CircularAnim {
             go(null);
         }
 
+        @SuppressLint("NewApi")
         public void go(OnAnimationEndListener onAnimationEndListener) {
             mOnAnimationEndListener = onAnimationEndListener;
 
@@ -111,46 +144,37 @@ public class CircularAnim {
                 return;
             }
 
-            int rippleCX, rippleCY, maxRadius;
-            if (mTriggerView != null) {
-                int[] tvLocation = new int[2];
-                mTriggerView.getLocationInWindow(tvLocation);
-                final int tvCX = tvLocation[0] + mTriggerView.getWidth() / 2;
-                final int tvCY = tvLocation[1] + mTriggerView.getHeight() / 2;
+            if (mTriggerPoint == null) {
+                if (mTriggerView != null) {
+                    int[] tvLocation = new int[2];
+                    mTriggerView.getLocationInWindow(tvLocation);
+                    final int tvCX = tvLocation[0] + mTriggerView.getWidth() / 2;
+                    final int tvCY = tvLocation[1] + mTriggerView.getHeight() / 2;
 
-                int[] avLocation = new int[2];
-                mAnimView.getLocationInWindow(avLocation);
-                final int avLX = avLocation[0];
-                final int avTY = avLocation[1];
+                    int[] avLocation = new int[2];
+                    mAnimView.getLocationInWindow(avLocation);
+                    final int avLX = avLocation[0];
+                    final int avTY = avLocation[1];
 
-                int triggerX = Math.max(avLX, tvCX);
-                triggerX = Math.min(triggerX, avLX + mAnimView.getWidth());
+                    int triggerX = Math.max(avLX, tvCX);
+                    triggerX = Math.min(triggerX, avLX + mAnimView.getWidth());
 
-                int triggerY = Math.max(avTY, tvCY);
-                triggerY = Math.min(triggerY, avTY + mAnimView.getHeight());
-
-                // 以上全为绝对坐标
-
-                int avW = mAnimView.getWidth();
-                int avH = mAnimView.getHeight();
-
-                rippleCX = triggerX - avLX;
-                rippleCY = triggerY - avTY;
-
-                // 计算水波中心点至 @mAnimView 边界的最大距离
-                int maxW = Math.max(rippleCX, avW - rippleCX);
-                int maxH = Math.max(rippleCY, avH - rippleCY);
-                maxRadius = (int) Math.sqrt(maxW * maxW + maxH * maxH) + 1;
-            } else {
-                rippleCX = (mAnimView.getLeft() + mAnimView.getRight()) / 2;
-                rippleCY = (mAnimView.getTop() + mAnimView.getBottom()) / 2;
-
-                int w = mAnimView.getWidth();
-                int h = mAnimView.getHeight();
-
-                // 勾股定理 & 进一法
-                maxRadius = (int) Math.sqrt(w * w + h * h) + 1;
+                    int triggerY = Math.max(avTY, tvCY);
+                    triggerY = Math.min(triggerY, avTY + mAnimView.getHeight());
+                    // 以上全为绝对坐标
+                    mTriggerPoint = new Point(triggerX - avLX, triggerY - avTY);
+                } else {
+                    int centerX = (mAnimView.getLeft() + mAnimView.getRight()) / 2;
+                    int centerY = (mAnimView.getTop() + mAnimView.getBottom()) / 2;
+                    mTriggerPoint = new Point(centerX, centerY);
+                }
             }
+
+            // 计算水波中心点至 @mAnimView 边界的最大距离
+            int maxW = Math.max(mTriggerPoint.x, mAnimView.getWidth() - mTriggerPoint.x);
+            int maxH = Math.max(mTriggerPoint.y, mAnimView.getHeight() - mTriggerPoint.y);
+            // 勾股定理 & 进一法
+            int maxRadius = (int) Math.sqrt(maxW * maxW + maxH * maxH) + 1;
 
             if (isShow && mEndRadius == null)
                 mEndRadius = maxRadius + 0F;
@@ -158,9 +182,9 @@ public class CircularAnim {
                 mStartRadius = maxRadius + 0F;
 
             try {
-                Animator anim = ViewAnimationUtils.createCircularReveal(
-                        mAnimView, rippleCX, rippleCY, mStartRadius, mEndRadius);
 
+                Animator anim = ViewAnimationUtils.createCircularReveal(
+                        mAnimView, mTriggerPoint.x, mTriggerPoint.y, mStartRadius, mEndRadius);
 
                 mAnimView.setVisibility(View.VISIBLE);
                 anim.setDuration(mDurationMills);
@@ -172,7 +196,10 @@ public class CircularAnim {
                         doOnEnd();
                     }
                 });
-
+                if (mOnAnimatorDeployListener == null)
+                    mOnAnimatorDeployListener = isShow ? sShowAnimatorDeployListener : sHideAnimatorDeployListener;
+                if (mOnAnimatorDeployListener != null)
+                    mOnAnimatorDeployListener.deployAnimator(anim);
                 anim.start();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -192,19 +219,31 @@ public class CircularAnim {
 
     }
 
-    @SuppressLint("NewApi")
+
     public static class FullActivityBuilder {
         private Activity mActivity;
-        private View mTriggerView;
+        private Point mTriggerPoint;
         private float mStartRadius = MINI_RADIUS;
         private int mColorOrImageRes = getColorOrImageRes();
+        private Drawable mDrawable;
         private Long mDurationMills;
+        private OnAnimatorDeployListener mStartAnimatorDeployListener;
+        private OnAnimatorDeployListener mReturnAnimatorDeployListener;
         private OnAnimationEndListener mOnAnimationEndListener;
         private int mEnterAnim = android.R.anim.fade_in, mExitAnim = android.R.anim.fade_out;
 
         public FullActivityBuilder(Activity activity, View triggerView) {
             mActivity = activity;
-            mTriggerView = triggerView;
+            int[] location = new int[2];
+            triggerView.getLocationInWindow(location);
+            final int cx = location[0] + triggerView.getWidth() / 2;
+            final int cy = location[1] + triggerView.getHeight() / 2;
+            mTriggerPoint = new Point(cx, cy);
+        }
+
+        public FullActivityBuilder(Activity activity, Point triggerPoint) {
+            mActivity = activity;
+            mTriggerPoint = triggerPoint;
         }
 
         public FullActivityBuilder startRadius(float startRadius) {
@@ -212,8 +251,20 @@ public class CircularAnim {
             return this;
         }
 
+        /**
+         * set the ripple background drawableRes.
+         * this will be override by {@link FullActivityBuilder#drawable(Drawable)}
+         */
         public FullActivityBuilder colorOrImageRes(int colorOrImageRes) {
             mColorOrImageRes = colorOrImageRes;
+            return this;
+        }
+
+        /**
+         * set the ripple background drawable.
+         */
+        public FullActivityBuilder drawable(Drawable drawable) {
+            mDrawable = drawable;
             return this;
         }
 
@@ -228,94 +279,103 @@ public class CircularAnim {
             return this;
         }
 
+        /**
+         * set the start animation interceptor
+         */
+        public FullActivityBuilder deployStartAnimator(OnAnimatorDeployListener onAnimatorDeployListener) {
+            mStartAnimatorDeployListener = onAnimatorDeployListener;
+            return this;
+        }
+
+        /**
+         * set the return animation interceptor
+         */
+        public FullActivityBuilder deployReturnAnimator(OnAnimatorDeployListener onAnimatorDeployListener) {
+            mReturnAnimatorDeployListener = onAnimatorDeployListener;
+            return this;
+        }
+
+        @SuppressLint("NewApi")
         public void go(OnAnimationEndListener onAnimationEndListener) {
             mOnAnimationEndListener = onAnimationEndListener;
-
             // 版本判断,小于5.0则无动画.
             if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
                 doOnEnd();
                 return;
             }
 
-            int[] location = new int[2];
-            mTriggerView.getLocationInWindow(location);
-            final int cx = location[0] + mTriggerView.getWidth() / 2;
-            final int cy = location[1] + mTriggerView.getHeight() / 2;
             final ImageView view = new ImageView(mActivity);
             view.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            view.setImageResource(mColorOrImageRes);
+            // 优先使用 mDrawable
+            if (mDrawable != null)
+                view.setImageDrawable(mDrawable);
+            else
+                view.setImageResource(mColorOrImageRes);
             final ViewGroup decorView = (ViewGroup) mActivity.getWindow().getDecorView();
             int w = decorView.getWidth();
             int h = decorView.getHeight();
             decorView.addView(view, w, h);
 
             // 计算中心点至view边界的最大距离
-            int maxW = Math.max(cx, w - cx);
-            int maxH = Math.max(cy, h - cy);
+            int maxW = Math.max(mTriggerPoint.x, w - mTriggerPoint.x);
+            int maxH = Math.max(mTriggerPoint.y, h - mTriggerPoint.y);
             final int finalRadius = (int) Math.sqrt(maxW * maxW + maxH * maxH) + 1;
 
-            try {
-                Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy, mStartRadius, finalRadius);
+            Animator anim = ViewAnimationUtils.createCircularReveal(view, mTriggerPoint.x, mTriggerPoint.y, mStartRadius, finalRadius);
 
-                int maxRadius = (int) Math.sqrt(w * w + h * h) + 1;
-                // 若未设置时长，则以PERFECT_MILLS为基准根据水波扩散的距离来计算实际时间
-                if (mDurationMills == null) {
-                    // 算出实际边距与最大边距的比率
-                    double rate = 1d * finalRadius / maxRadius;
-                    // 为了让用户便于感触到水波，速度应随最大边距的变小而越慢，扩散时间应随最大边距的变小而变小，因此比率应在 @rate 与 1 之间。
-                    mDurationMills = (long) (getFullActivityMills() * Math.sqrt(rate));
-                }
-                final long finalDuration = mDurationMills;
-                // 由于thisActivity.startActivity()会有所停顿，所以进入的水波动画应比退出的水波动画时间短才能保持视觉上的一致。
-                anim.setDuration((long) (finalDuration * 0.9));
-                anim.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-
-                        doOnEnd();
-
-                        mActivity.overridePendingTransition(mEnterAnim, mExitAnim);
-
-                        // 默认显示返回至当前Activity的动画.
-                        mTriggerView.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (mActivity.isFinishing()) return;
-                                try {
-                                    Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy,
-                                            finalRadius, mStartRadius);
-                                    anim.setDuration(finalDuration);
-                                    anim.addListener(new AnimatorListenerAdapter() {
-                                        @Override
-                                        public void onAnimationEnd(Animator animation) {
-                                            super.onAnimationEnd(animation);
-                                            try {
-                                                decorView.removeView(view);
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    });
-                                    anim.start();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    try {
-                                        decorView.removeView(view);
-                                    } catch (Exception e1) {
-                                        e1.printStackTrace();
-                                    }
-                                }
-                            }
-                        }, 1000);
-
-                    }
-                });
-                anim.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-                doOnEnd();
+            int maxRadius = (int) Math.sqrt(w * w + h * h) + 1;
+            // 若未设置时长，则以PERFECT_MILLS为基准根据水波扩散的距离来计算实际时间
+            if (mDurationMills == null) {
+                // 算出实际边距与最大边距的比率
+                double rate = 1d * finalRadius / maxRadius;
+                // 为了让用户便于感触到水波，速度应随最大边距的变小而越慢，扩散时间应随最大边距的变小而变小，因此比率应在 @rate 与 1 之间。
+                mDurationMills = (long) (getFullActivityMills() * Math.sqrt(rate));
             }
+            final long finalDuration = mDurationMills;
+            // 由于thisActivity.startActivity()会有所停顿，所以进入的水波动画应比退出的水波动画时间短才能保持视觉上的一致。
+            anim.setDuration((long) (finalDuration * 0.9));
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+
+                    doOnEnd();
+
+                    mActivity.overridePendingTransition(mEnterAnim, mExitAnim);
+
+                    // 默认显示返回至当前Activity的动画, not support
+                    decorView.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mActivity.isFinishing())
+                                return;
+                            Animator returnAnim = ViewAnimationUtils.createCircularReveal(view,
+                                    mTriggerPoint.x, mTriggerPoint.y,
+                                    finalRadius, mStartRadius);
+                            returnAnim.setDuration(finalDuration);
+                            returnAnim.addListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    if (!mActivity.isFinishing() && view.getParent() != null)
+                                        ((ViewGroup) view.getParent()).removeView(view);
+                                }
+                            });
+                            if (mReturnAnimatorDeployListener == null)
+                                mReturnAnimatorDeployListener = sReturnAnimatorDeployListener;
+                            if (mReturnAnimatorDeployListener != null)
+                                mReturnAnimatorDeployListener.deployAnimator(returnAnim);
+                            returnAnim.start();
+                        }
+                    }, 1000);
+
+                }
+            });
+            if (mStartAnimatorDeployListener == null)
+                mStartAnimatorDeployListener = sStartAnimatorDeployListener;
+            if (mStartAnimatorDeployListener != null)
+                mStartAnimatorDeployListener.deployAnimator(anim);
+            anim.start();
         }
 
         private void doOnEnd() {
@@ -342,11 +402,28 @@ public class CircularAnim {
         return new FullActivityBuilder(activity, triggerView);
     }
 
-    /* 设置默认时长，设置充满activity的默认颜色或图片资源 */
+    /**
+     * 设置默认时长，设置充满activity的默认颜色或图片资源
+     */
     public static void init(long perfectMills, long fullActivityPerfectMills, int colorOrImageRes) {
         sPerfectMills = perfectMills;
         sFullActivityPerfectMills = fullActivityPerfectMills;
         sColorOrImageRes = colorOrImageRes;
+    }
+
+    /**
+     * 设置默认时长，设置充满activity的默认颜色或图片资源
+     */
+    public static void initDefaultDeployAnimators(
+            OnAnimatorDeployListener showListener
+            , OnAnimatorDeployListener hideListener
+            , OnAnimatorDeployListener startAtyListener
+            , OnAnimatorDeployListener returnAtyListener
+    ) {
+        sShowAnimatorDeployListener = showListener;
+        sHideAnimatorDeployListener = hideListener;
+        sStartAnimatorDeployListener = startAtyListener;
+        sReturnAnimatorDeployListener = returnAtyListener;
     }
 
 }

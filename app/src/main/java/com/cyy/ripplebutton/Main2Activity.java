@@ -1,6 +1,5 @@
 package com.cyy.ripplebutton;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -10,7 +9,7 @@ import com.cyy.library.RippleButton;
 import com.cyy.library.RippleButtonClickListener;
 import com.cyy.library.RippleClickAdapter;
 
-public class MainActivity extends AppCompatActivity implements RippleButtonClickListener {
+public class Main2Activity extends AppCompatActivity implements RippleButtonClickListener {
 
     private RippleButton rippleButton;
 
@@ -19,26 +18,28 @@ public class MainActivity extends AppCompatActivity implements RippleButtonClick
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         rippleButton = findViewById(R.id.bt);
+        // 红色按钮显示时间
+        rippleButton.setErrorDuration(2000);
         // 点击时间
         rippleButton.setRippleClickListener(new RippleClickAdapter() {
             @Override
             public void onDefaultClick() {
-                Toast.makeText(MainActivity.this, "灰色", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Main2Activity.this, "灰色", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onSuccessClick() {
-                Toast.makeText(MainActivity.this, "绿色", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Main2Activity.this, "绿色", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onErrorClick() {
-                Toast.makeText(MainActivity.this, "红色", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Main2Activity.this, "红色", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onLoadingClick() {
-                Toast.makeText(MainActivity.this, "加载", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Main2Activity.this, "加载", Toast.LENGTH_SHORT).show();
             }
         });
 //        rippleButton.setRippleClickListener(this);
@@ -46,7 +47,6 @@ public class MainActivity extends AppCompatActivity implements RippleButtonClick
 
     public void gray(View view) {
         rippleButton.showNormalButton();
-        startActivity(new Intent(this, Main2Activity.class));
     }
 
     public void green(View view) {
@@ -65,22 +65,22 @@ public class MainActivity extends AppCompatActivity implements RippleButtonClick
 
     @Override
     public void onDefaultClick() {
-        Toast.makeText(MainActivity.this, "灰色", Toast.LENGTH_SHORT).show();
+        Toast.makeText(Main2Activity.this, "灰色", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onSuccessClick() {
-        Toast.makeText(MainActivity.this, "绿色", Toast.LENGTH_SHORT).show();
+        Toast.makeText(Main2Activity.this, "绿色", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onErrorClick() {
-        Toast.makeText(MainActivity.this, "红色", Toast.LENGTH_SHORT).show();
+        Toast.makeText(Main2Activity.this, "红色", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onLoadingClick() {
-        Toast.makeText(MainActivity.this, "加载", Toast.LENGTH_SHORT).show();
+        Toast.makeText(Main2Activity.this, "加载", Toast.LENGTH_SHORT).show();
     }
 
 }
