@@ -28,7 +28,7 @@ allprojects {
 > app build.gradle配置
 
 ```
-implementation 'com.github.chenyy0708:RippleButton:1.0.1'
+implementation 'com.github.chenyy0708:RippleButton:1.0.2'
 ```
 
 ## 属性
