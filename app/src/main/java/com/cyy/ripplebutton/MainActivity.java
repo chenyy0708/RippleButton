@@ -22,17 +22,17 @@ public class MainActivity extends AppCompatActivity implements RippleButtonClick
         rippleButton.setRippleClickListener(new RippleClickAdapter() {
             @Override
             public void onDefaultClick() {
-                Toast.makeText(MainActivity.this, "灰色", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "默认", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onSuccessClick() {
-                Toast.makeText(MainActivity.this, "绿色", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "成功", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onErrorClick() {
-                Toast.makeText(MainActivity.this, "红色", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "失败", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -40,12 +40,10 @@ public class MainActivity extends AppCompatActivity implements RippleButtonClick
                 Toast.makeText(MainActivity.this, "加载", Toast.LENGTH_SHORT).show();
             }
         });
-//        rippleButton.setRippleClickListener(this);
     }
 
     public void gray(View view) {
         rippleButton.showNormalButton();
-//        startActivity(new Intent(this, Main2Activity.class));
     }
 
     public void green(View view) {
@@ -53,9 +51,7 @@ public class MainActivity extends AppCompatActivity implements RippleButtonClick
     }
 
     public void red(View view) {
-        rippleButton.showErrorButton();
-        // false表示红色按钮不会重置到上一个颜色
-//        rippleButton.showErrorButton(false);
+        rippleButton.showErrorButton(false);
     }
 
     public void loading(View view) {

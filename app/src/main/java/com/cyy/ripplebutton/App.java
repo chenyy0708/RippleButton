@@ -19,6 +19,8 @@ public class App extends Application {
                 .setLoadingImg(R.drawable.loading)
                 // 错误按钮显示时间
                 .setErrorDuritaion(1000)
+                // 涟漪动画时间
+                .setPerfectMills(500)
                 // 默认文字颜色
                 .setNormalTextColor(R.color.white)
                 // 成功文字颜色
