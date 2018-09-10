@@ -3,4 +3,31 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="green">#FF00FF00</color>
+    <color name="transparent">#00000000</color>
+    <color name="line">#8CD276</color>
+    <color name="color_main">#87CD25</color>
+    <color name="divider_color">#EBEBEB</color>
+    <color name="color_666">#666666</color>
+    <color name="color_333">#333333</color>
+    <color name="color_999">#999999</color>
+    <color name="color_f5">#F5F5F5</color>
+    <color name="color_f1">#F1F1F1</color>
+    <color name="DCDCDC">#DCDCDC</color>
+    <color name="divider">#EBEBEB</color>
+    <color name="red_end">#DD2727</color>
+    <color name="base_text_color_light">#6FBA2C</color>
+    <color name="alpha_75_black">#BF000000</color>
+
+    <color name="color_CCC">#CCCCCC</color>
+    <color name="linechart_bottom">#000000</color>
+    <color name="alpha_55_white">#8CFFFFFF</color>
+    <color name="color_main_color" >#87CD25</color>
+
+    <color name="line_bg">#CDCDCD</color>
+
 </resources>

@@ -1,6 +1,5 @@
 package com.cyy.ripplebutton;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -46,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements RippleButtonClick
 
     public void gray(View view) {
         rippleButton.showNormalButton();
-        startActivity(new Intent(this, Main2Activity.class));
+//        startActivity(new Intent(this, Main2Activity.class));
     }
 
     public void green(View view) {

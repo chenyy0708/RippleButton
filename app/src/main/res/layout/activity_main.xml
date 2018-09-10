@@ -17,21 +17,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="gray"
-            android:text="灰色" />
+            android:text="默认" />
 
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="green"
-            android:text="绿色" />
+            android:text="成功" />
 
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="red"
-            android:text="红色" />
+            android:text="失败" />
 
         <Button
             android:layout_width="0dp"
@@ -49,11 +49,10 @@
         android:layout_gravity="center"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        app:mErrorText="红色"
+        app:mErrorText="失败"
         app:mLoadingText="加载中"
-        app:mNormalText="灰色"
-        app:mRadius="4dp"
-        app:mStatus="1"
-        app:mSuccessText="绿色" />
+        app:mNormalText="默认"
+        app:mStatus="0"
+        app:mSuccessText="成功" />
 
 </FrameLayout>

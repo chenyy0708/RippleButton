@@ -3,50 +3,50 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <!--灰色按钮-->
+
     <TextView
-        android:id="@+id/tv_gray"
+        android:id="@+id/tv_normal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/shape_gray"
+        android:background="@drawable/shape_normal"
         android:enabled="true"
         android:gravity="center"
         android:textColor="@color/color_999"
         android:textSize="@dimen/tv_15"
         tools:text="灰色" />
-    <!--红色按钮-->
+
     <TextView
-        android:id="@+id/tv_red"
+        android:id="@+id/tv_error"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/shape_red"
+        android:background="@drawable/shape_error"
         android:enabled="true"
         android:gravity="center"
         android:text=""
         android:textColor="@color/white"
         android:textSize="@dimen/tv_15"
         android:visibility="invisible" />
-    <!--绿色按钮-->
+
     <TextView
-        android:id="@+id/tv_green"
+        android:id="@+id/tv_success"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/shape_green"
+        android:background="@drawable/shape_success"
         android:enabled="true"
         android:gravity="center"
         android:text=""
         android:textColor="@color/white"
         android:textSize="@dimen/tv_15"
         android:visibility="invisible" />
-    <!--加载按钮-->
+
     <FrameLayout
         android:id="@+id/fl_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/shape_green"
+        android:background="@drawable/shape_success"
         android:visibility="invisible">
 
         <LinearLayout
@@ -72,5 +72,4 @@
                 android:textSize="15sp" />
         </LinearLayout>
     </FrameLayout>
-
 </FrameLayout>

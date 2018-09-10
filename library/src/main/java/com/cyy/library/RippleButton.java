@@ -11,11 +11,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
-public class RippleButton extends RelativeLayout implements View.OnClickListener {
+public class RippleButton extends FrameLayout implements View.OnClickListener {
     public static final int NORMAL = 0;
     public static final int SUCCESS = 1;
     public static final int ERROR = 2;
@@ -72,7 +71,36 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
      * 涟漪动画时间
      */
     private long perfectMills = 300;
+    /**
+     * 公共属性
+     */
     private static Builder builder = new Builder();
+
+
+    @ColorRes
+    private int mNormalTextColor;
+    @ColorRes
+    private int mErrorTextColor;
+    @ColorRes
+    private int mSuccessTextColor;
+    @ColorRes
+    private int mLoadingTextColor;
+    /**
+     * 默认按钮颜色
+     */
+    private int mNormalColor;
+    /**
+     * 错误按钮颜色
+     */
+    private int mErrorColor;
+    /**
+     * 成功按钮颜色
+     */
+    private int mSuccessColor;
+    /**
+     * 加载按钮颜色
+     */
+    private int mLoadingColor;
 
     public RippleButton(Context context) {
         this(context, null);
@@ -110,9 +138,9 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
         } finally {
             a.recycle();
         }
-        mTvNormal = findViewById(R.id.tv_gray);
-        mTvError = findViewById(R.id.tv_red);
-        mTvSuccess = findViewById(R.id.tv_green);
+        mTvNormal = findViewById(R.id.tv_normal);
+        mTvError = findViewById(R.id.tv_error);
+        mTvSuccess = findViewById(R.id.tv_success);
         mFlLoading = findViewById(R.id.fl_loading);
         mTvLoading = findViewById(R.id.tv_loading);
         mIvLoading = findViewById(R.id.iv_loading);
@@ -121,10 +149,18 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
         // 成功按钮 默认显示 默认 按钮的字
         mTvSuccess.setText(TextUtils.isEmpty(mSuccessText) ? mNormalText : mSuccessText);
         mTvLoading.setText(TextUtils.isEmpty(mLoadingText) ? mContext.getString(R.string.loading) : mLoadingText);
-        mTvNormal.setTextColor(getResources().getColor(R.color.color_999));
-        mTvError.setTextColor(getResources().getColor(R.color.white));
-        mTvSuccess.setTextColor(getResources().getColor(R.color.white));
+        // 文字颜色
+        mTvNormal.setTextColor(getResources().getColor(mNormalTextColor));
+        mTvError.setTextColor(getResources().getColor(mErrorTextColor));
+        mTvSuccess.setTextColor(getResources().getColor(mSuccessTextColor));
+        mTvLoading.setTextColor(getResources().getColor(mLoadingTextColor));
         mIvLoading.setImageResource(mLoadingImg);
+        // 按钮背景颜色
+        mTvNormal.setBackgroundResource(mNormalColor);
+        mTvSuccess.setBackgroundResource(mSuccessColor);
+        mTvError.setBackgroundResource(mErrorColor);
+        mFlLoading.setBackgroundResource(mLoadingColor);
+        // 按钮点击事件
         mTvNormal.setOnClickListener(this);
         mTvSuccess.setOnClickListener(this);
         mTvError.setOnClickListener(this);
@@ -152,6 +188,17 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
         this.mLoadingImg = builder.mLoadingImg;
         this.mRadius = builder.mRadius;
         this.duration = builder.mErrorDuritaion;
+        // 按钮文字颜色
+        this.mNormalTextColor = builder.mNormalTextColor;
+        this.mSuccessTextColor = builder.mSuccessTextColor;
+        this.mLoadingTextColor = builder.mLoadingTextColor;
+        this.mErrorTextColor = builder.mErrorTextColor;
+        // 按钮背景颜色，通过shape控制颜色、圆角等
+        this.mNormalColor = builder.mNormalColor;
+        this.mErrorColor = builder.mErrorColor;
+        this.mSuccessColor = builder.mSuccessColor;
+        this.mLoadingColor = builder.mLoadingColor;
+
     }
 
     /**
@@ -358,11 +405,11 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
      */
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.tv_gray) {// 灰色
+        if (view.getId() == R.id.tv_normal) {// 灰色
             if (listener != null) listener.onDefaultClick();
-        } else if (view.getId() == R.id.tv_green) { // 绿色
+        } else if (view.getId() == R.id.tv_success) { // 绿色
             if (listener != null) listener.onSuccessClick();
-        } else if (view.getId() == R.id.tv_red) { // 红色
+        } else if (view.getId() == R.id.tv_error) { // 红色
             if (listener != null) listener.onErrorClick();
         } else if (view.getId() == R.id.fl_loading) { // 加载
             if (listener != null) listener.onLoadingClick();
@@ -397,23 +444,27 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
         /**
          * 默认按钮颜色
          */
-        @ColorRes
-        private int mNormalColor;
+        private int mNormalColor = R.drawable.shape_normal;
         /**
          * 错误按钮颜色
          */
-        @ColorRes
-        private int mErrorColor;
+        private int mErrorColor = R.drawable.shape_error;
         /**
          * 成功按钮颜色
          */
-        @ColorRes
-        private int mSuccessColor;
+        private int mSuccessColor = R.drawable.shape_success;
         /**
          * 加载按钮颜色
          */
+        private int mLoadingColor = R.drawable.shape_success;
         @ColorRes
-        private int mLoadingColor;
+        private int mNormalTextColor = R.color.color_999;
+        @ColorRes
+        private int mErrorTextColor = R.color.white;
+        @ColorRes
+        private int mSuccessTextColor = R.color.white;
+        @ColorRes
+        private int mLoadingTextColor = R.color.white;
 
         public Builder setErrorDuritaion(int mErrorDuritaion) {
             this.mErrorDuritaion = mErrorDuritaion;
@@ -447,6 +498,26 @@ public class RippleButton extends RelativeLayout implements View.OnClickListener
 
         public Builder setLoadingColor(int mLoadingColor) {
             this.mLoadingColor = mLoadingColor;
+            return this;
+        }
+
+        public Builder setNormalTextColor(int mNormalTextColor) {
+            this.mNormalTextColor = mNormalTextColor;
+            return this;
+        }
+
+        public Builder setErrorTextColor(int mErrorTextColor) {
+            this.mErrorTextColor = mErrorTextColor;
+            return this;
+        }
+
+        public Builder setSuccessTextColor(int mSuccessTextColor) {
+            this.mSuccessTextColor = mSuccessTextColor;
+            return this;
+        }
+
+        public Builder setLoadingTextColor(int mLoadingTextColor) {
+            this.mLoadingTextColor = mLoadingTextColor;
             return this;
         }
 
