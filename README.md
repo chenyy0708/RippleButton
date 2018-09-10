@@ -72,3 +72,56 @@ RippleButton.getBuilder()
                 // 失敗背景颜色
                 .setErrorColor(R.drawable.shape_red);
 ```
+
+## 代码设置
+
+> 1.动态设置按钮文字和状态
+
+```
+	rippleButton.setNormalText("默认");
+        rippleButton.setErrorText("失败");
+        rippleButton.setSuccessText("成功");
+        rippleButton.setLoadingText("加载");
+        // 成功状态按钮
+        rippleButton.showSuccessButton();
+        rippleButton.showSuccessButton("登陆成功");
+        // 失败状态按钮
+        rippleButton.showErrorButton();
+        rippleButton.showErrorButton("用户密码不对");
+	// 显示失败按钮，不自动回到上一个按钮状态
+        rippleButton.showErrorButton(false);
+        // 默认状态按钮
+        rippleButton.showNormalButton();
+	// 失败按钮显示时间
+	rippleButton.setErrorDuration(1000);
+	
+
+```
+
+> 2.按钮点击事件,采用适配器模式，可以实现根据需要选择需要的点击方法。
+
+```
+	// 点击时间
+        rippleButton.setRippleClickListener(new RippleClickAdapter() {
+            @Override
+            public void onDefaultClick() {
+                Toast.makeText(MainActivity.this, "默认", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSuccessClick() {
+                Toast.makeText(MainActivity.this, "成功", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onErrorClick() {
+                Toast.makeText(MainActivity.this, "失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onLoadingClick() {
+                Toast.makeText(MainActivity.this, "加载", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+```
